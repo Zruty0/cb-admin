@@ -1,0 +1,95 @@
+@page
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Milligram CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
+</head>
+
+<script src="https://cdn.jsdelivr.net/npm/cash-dom/dist/cash.min.js"></script>
+<script>
+    $(function () {
+        $("#show").on('click', function () {
+            $("#bans tbody").html("");
+            $("#aliases tbody").html("");
+            $("#loading").show();
+            let name = encodeURIComponent($("#nameField").val());
+
+            fetch("/data/get_user_info?name=" + name)
+                .then(response => response.json())
+                .then(data => {
+                    let bansBody = "";
+                    for (const ban of data.bans) {
+                        bansBody += `<tr><td>${ban.playerName}</td> <td>${ban.reason}</td> <td>${ban.startTimeStr}</td> <td>${ban.expiryTimeStr} (${ban.remainingTimeStr})</td> <td>${ban.adminName}</td></tr>`
+                    }
+                    $("#bans tbody").html(bansBody);
+
+                    let aliBody = "";
+                    for (const al of data.aliases) {
+                        aliBody += `<tr><td>${al.alias}</td> <td>${al.lastUsedStr}</td></tr>`
+                    }
+                    $("#aliases tbody").html(aliBody);
+                    $("#loading").hide();
+                });
+        });
+    });
+</script>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="column">
+                @{
+                    await Html.RenderPartialAsync("_AdminMenu");
+                }
+            </div>
+        </div>
+        <div class="row">
+            <div class="column">
+                <form>
+                    <fieldset>
+                        <label for="nameField">User name</label>
+                        <input type="text" placeholder="Alonzo" id="nameField">
+                        <input id="show" class="button-outline" type="button" value="Show">
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <img id="loading" src="/loading.gif" alt="Loading..." style="display:none" />
+
+            <div class="column">
+                <h3>Player Bans</h3>
+                <table id="bans">
+                    <thead>
+                        <th>Player name</th>
+                        <th>Reason</th>
+                        <th>Ban issued</th>
+                        <th>Ban expires</th>
+                        <th>Admin name</th>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
+                <img id="loading" src="/loading.gif" alt="Loading..." style="display:none" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="column">
+                <h3>Aliases Used</h3>
+                <table id="aliases">
+                    <thead>
+                        <th>Player name</th>
+                        <th>Last used</th>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</body>
