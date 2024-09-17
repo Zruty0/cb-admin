@@ -107,7 +107,7 @@ app.Use(async (context, next) =>
 {
     if (context.Request.Path == "/")
     {
-        context.Response.Redirect("/admin");
+        context.Response.Redirect("/user_bans");
         return;
     }
     await next();
@@ -121,8 +121,44 @@ app.UseStaticFiles(new StaticFileOptions
 // Admin API
 app.Map("/data/get_user_info", async (HttpContext context, string name) =>
 {
-    var output= dataClient.LoadPlayerInfo(name);
+    var output = dataClient.LoadPlayerInfo(name);
     await context.Response.WriteAsJsonAsync(output);
+}).RequireAuthorization();
+
+app.MapPost("/data/add_ban", async (HttpContext context, int id) =>
+{
+    string? reason = context.Request.Form["reason"];
+    int duration = int.Parse(context.Request.Form["duration"]);
+    if (string.IsNullOrEmpty(reason) || duration <= 0)
+    {
+        return;
+    }
+    var adminInfo = dataClient.GetAdminInfo(context.User.Identity?.Name);
+    if (adminInfo != null)
+    {
+        // I think it should never be null, because this requires authorization. But adding this check just for good measure.
+        var name = dataClient.GetLastPlayerName(id);
+        dataClient.AddNewBan(adminInfo.Id, id, reason, duration);
+        context.Response.Redirect($"/user_bans?name={name}");
+    }
+}).RequireAuthorization();
+
+app.MapPost("/data/change_ban", async (HttpContext context, int banId) =>
+{
+    int duration = int.Parse(context.Request.Form["duration"]);
+    if (duration < 0)
+    {
+        return;
+    }
+    var adminInfo = dataClient.GetAdminInfo(context.User.Identity?.Name);
+    if (adminInfo != null)
+    {
+        // I think it should never be null, because this requires authorization. But adding this check just for good measure.
+        dataClient.ChangeBanDuration(banId, duration, adminInfo.Id);
+
+        var name = context.Request.Form["playerName"];
+        context.Response.Redirect($"/user_bans?name={name}");
+    }
 }).RequireAuthorization();
 
 app.Run();

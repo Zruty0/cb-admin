@@ -1,4 +1,5 @@
 @page
+@model UserBansModel
 
 <!DOCTYPE html>
 <html>
@@ -6,36 +7,60 @@
 <head>
     <!-- Milligram CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
-</head>
+    <link rel="stylesheet" href="/main.css">
 
-<script src="https://cdn.jsdelivr.net/npm/cash-dom/dist/cash.min.js"></script>
-<script>
-    $(function () {
-        $("#show").on('click', function () {
-            $("#bans tbody").html("");
-            $("#aliases tbody").html("");
-            $("#loading").show();
-            let name = encodeURIComponent($("#nameField").val());
+    <script src="https://cdn.jsdelivr.net/npm/cash-dom/dist/cash.min.js"></script>
+    <script>
+        $(function () {
+            fetchData = function () {
+                $("#bans tbody").html("");
+                $("#aliases tbody").html("");
+                $("#loading").show();
+                let name = encodeURIComponent($("#nameField").val());
 
-            fetch("/data/get_user_info?name=" + name)
-                .then(response => response.json())
-                .then(data => {
-                    let bansBody = "";
-                    for (const ban of data.bans) {
-                        bansBody += `<tr><td>${ban.playerName}</td> <td>${ban.reason}</td> <td>${ban.startTimeStr}</td> <td>${ban.expiryTimeStr} (${ban.remainingTimeStr})</td> <td>${ban.adminName}</td></tr>`
-                    }
-                    $("#bans tbody").html(bansBody);
+                fetch("/data/get_user_info?name=" + name)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data != null) {
+                            $("#notfound").hide();
+                            $("#found").show();
+                            let bansBody = "";
+                            for (const ban of data.bans) {
+                                bansBody += `<tr><td>${ban.playerName}</td> <td>${ban.reason}</td> <td>${ban.startTimeStr}</td>` +
+                                    `<td>${ban.expiryTimeStr} (${ban.remainingTimeStr})</td> <td>${ban.adminName}</td>`;
+                                if (ban.remainingTimeMinutes > 0) {
+                                    bansBody += `<td><a href="/edit_ban?banid=${ban.id}">Edit</a></td></tr>`;
+                                }
+                                bansBody += "</tr>"
+                            }
+                            $("#bans tbody").html(bansBody);
 
-                    let aliBody = "";
-                    for (const al of data.aliases) {
-                        aliBody += `<tr><td>${al.alias}</td> <td>${al.lastUsedStr}</td></tr>`
-                    }
-                    $("#aliases tbody").html(aliBody);
-                    $("#loading").hide();
-                });
+                            let aliBody = "";
+                            for (const al of data.aliases) {
+                                aliBody += `<tr><td>${al.alias}</td> <td>${al.lastUsedStr}</td></tr>`
+                            }
+                            $("#aliases tbody").html(aliBody);
+                            $("#newban").attr("href", `/add_ban?playerid=${data.id}`);
+                        }
+                        else {
+                            $("#notfound").show();
+                            $("#found").hide();
+
+                        }
+                        $("#loading").hide();
+                    });
+            };
+
+            $("#show").on('click', function () {
+                fetchData();
+                return false;
+            });
+            if ($("#nameField").val() != "") {
+                fetchData();
+            }
         });
-    });
-</script>
+    </script>
+</head>
 
 <body>
     <div class="container">
@@ -51,43 +76,51 @@
                 <form>
                     <fieldset>
                         <label for="nameField">User name</label>
-                        <input type="text" placeholder="Alonzo" id="nameField">
-                        <input id="show" class="button-outline" type="button" value="Show">
+                        <input type="text" placeholder="Alonzo" id="nameField" value="@Model.PlayerName">
+                        <input id="show" class="button-outline" type="submit" value="Show">
                     </fieldset>
                 </form>
             </div>
         </div>
         <div class="row">
             <img id="loading" src="/loading.gif" alt="Loading..." style="display:none" />
-
-            <div class="column">
-                <h3>Player Bans</h3>
-                <table id="bans">
-                    <thead>
-                        <th>Player name</th>
-                        <th>Reason</th>
-                        <th>Ban issued</th>
-                        <th>Ban expires</th>
-                        <th>Admin name</th>
-                    </thead>
-                    <tbody>
-
-                    </tbody>
-                </table>
-                <img id="loading" src="/loading.gif" alt="Loading..." style="display:none" />
-            </div>
+            <div id="notfound" style="display:none">User not found</div>
         </div>
-        <div class="row">
-            <div class="column">
-                <h3>Aliases Used</h3>
-                <table id="aliases">
-                    <thead>
-                        <th>Player name</th>
-                        <th>Last used</th>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
+
+
+        <div id="found" style="display:none">
+            <div class="row">
+                <div class="column">
+                    <h3>Player Bans</h3>
+                    <a class="button button-outline" id="newban">Add new ban</a>
+                    <table id="bans">
+                        <thead>
+                            <th>Player name</th>
+                            <th>Reason</th>
+                            <th>Ban issued</th>
+                            <th>Ban expires</th>
+                            <th>Admin name</th>
+                            <th>Action</th>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                    <img id="loading" src="/loading.gif" alt="Loading..." style="display:none" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="column">
+                    <h3>Aliases Used</h3>
+                    <table id="aliases">
+                        <thead>
+                            <th>Player name</th>
+                            <th>Last used</th>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 

@@ -1,0 +1,59 @@
+@page
+@model EditBanModel
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Milligram CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
+    <link rel="stylesheet" href="/main.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="column">
+                @{
+                    await Html.RenderPartialAsync("_AdminMenu");
+                }
+            </div>
+        </div>
+        <div class="row">
+            <div class="column">
+                @if (Model.BanInfo == null)
+                {
+                    <div>Ban #@Model.BanId not found</div>
+                }
+                else
+                {
+                    <form action="/data/change_ban?banid=@Model.BanInfo.Id" method="post">
+                        <fieldset>
+                            <label for="playerName">Player name</label>
+                            <input type="text" name="playerName" value="@Model.BanInfo.PlayerName" readonly="readonly"
+                                disabled="disabled">
+                            <input type="hidden" name="playerName" value="@Model.BanInfo.PlayerName">
+
+                            <label for="reason">Admin</label>
+                            <input type="text" name="admin" value="@Model.BanInfo.AdminName" readonly="readonly"
+                                disabled="disabled">
+
+                            <label for="reason">Created</label>
+                            <input type="text" name="start_time" value="@Model.BanInfo.StartTimeStr" readonly="readonly"
+                                disabled="disabled">
+
+                            <label for="reason">Reason</label>
+                            <input type="text" name="reason" value="@Model.BanInfo.Reason" readonly="readonly"
+                                disabled="disabled">
+
+                            <label for="duration">Remaining duration (minutes. Set to zero to expire the ban)</label>
+                            <input id="duration" type="text" value="@Model.BanInfo.RemainingTimeMinutes" name="duration">
+
+                            <input class="button-primary" type="submit" value="Submit">
+                        </fieldset>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</body>

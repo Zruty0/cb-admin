@@ -1,5 +1,5 @@
 namespace CbAdmin;
-
+using NpgsqlTypes;
 
 /// <summary>
 /// Information about one ban.
@@ -7,7 +7,7 @@ namespace CbAdmin;
 public class BanInfo
 {
     public required int Id { get; set; }
-    public required string PlayerId { get; set; }
+    public required int PlayerId { get; set; }
     public required string PlayerName { get; set; }
     public required DateTime StartTime { get; set; }
     public required DateTime ExpiryTime { get; set; }
@@ -18,6 +18,7 @@ public class BanInfo
     public string StartTimeStr => StartTime.ToString("G");
     public string ExpiryTimeStr => ExpiryTime.ToString("G");
     public string RemainingTimeStr => ExpiryTime < DateTime.Now ? "expired" : (ExpiryTime - DateTime.Now).ToString("g");
+    public int RemainingTimeMinutes => ExpiryTime < DateTime.Now ? 0 : (int)(ExpiryTime - DateTime.Now).TotalMinutes;
 }
 
 /// <summary>
@@ -30,6 +31,20 @@ public class PlayerAliasInfo
 
     // Presentation functions.
     public string LastUsedStr => LastUsed.ToString("G");
+}
+
+/// <summary>
+/// Predefined reason/duration combinations.
+/// </summary>
+public class BanPresetInfo
+{
+    public string Reason { get; set; }
+    public float DurationSecondsRaw {get;set;}
+
+    // Presentation functions.
+    public TimeSpan Duration => TimeSpan.FromSeconds(DurationSecondsRaw);
+    public string DurationStr => Duration.TotalDays > 3650 ? "permanent" : Duration.ToString("g");
+    public int DurationMinutes => (int)Duration.TotalMinutes;
 }
 
 /// <summary>

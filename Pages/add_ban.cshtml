@@ -1,0 +1,67 @@
+@page
+@model NewBanModel
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Milligram CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
+    <link rel="stylesheet" href="/main.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/cash-dom/dist/cash.min.js"></script>
+    <script>
+        $(function () {
+            $("#presets").on("change", function (v) {
+                var elem = $(this)[0];
+                var selectedOption = elem.options[elem.selectedIndex];
+                var valueSelected = $(selectedOption).val();
+                var textSelected = $(selectedOption).attr("data");
+                $("#reason").val(textSelected);
+                $("#duration").val(valueSelected);
+            });
+        });
+    </script>
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="column">
+                @{
+                    await Html.RenderPartialAsync("_AdminMenu");
+                }
+            </div>
+        </div>
+        <div class="row">
+            <div class="column">
+                <form action="/data/add_ban?id=@Model.PlayerId" method="post">
+                    <fieldset>
+                        <label for="playerName">Player name</label>
+                        <input type="text" name="playerName" value="@Model.PlayerName" readonly="readonly">
+
+                        <label for="reason">Reason</label>
+                        <input id="reason" type="text" name="reason" placeholder="Reason">
+
+                        <label for="duration">Duration (minutes)</label>
+                        <input id="duration" type="text" name="duration">
+
+                        <label for="presets">Select from presets:</label>
+                        <select id="presets">
+                            <option value="0">-- select --</option>
+                            @foreach (var item in Model.Presets)
+                            {
+                                <option value="@item.DurationMinutes" data="@item.Reason">@item.Reason (@item.DurationStr)
+                                </option>
+                            }
+                        </select>
+
+                        <input class="button-primary" type="submit" value="Submit">
+                    </fieldset>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</body>

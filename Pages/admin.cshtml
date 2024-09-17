@@ -6,13 +6,13 @@
 <head>
     <!-- Milligram CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
+    <link rel="stylesheet" href="/main.css">
 </head>
 
 <body>
     <div class="container">
         <div class="row">
             <div class="column">
-                Welcome @Model.AdminInfo?.Name ! Your admin ID is @Model.AdminInfo?.Id
                 @{
                     await Html.RenderPartialAsync("_AdminMenu");
                 }
