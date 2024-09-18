@@ -5,7 +5,7 @@ public class AdminModel : PageModel
 {
     private DataClient dataClient;
 
-    public DataClient.AdminInfo AdminInfo { get; private set; }
+    public DataClient.AdminInfo AdminInfo { get; private set; } = null!;
 
     public AdminModel(IConfiguration configuration)
     {

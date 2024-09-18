@@ -125,10 +125,10 @@ app.Map("/data/get_user_info", async (HttpContext context, string name) =>
     await context.Response.WriteAsJsonAsync(output);
 }).RequireAuthorization();
 
-app.MapPost("/data/add_ban", async (HttpContext context, int id) =>
+app.MapPost("/data/add_ban", (HttpContext context, int id) =>
 {
     string? reason = context.Request.Form["reason"];
-    int duration = int.Parse(context.Request.Form["duration"]);
+    int duration = int.Parse(context.Request.Form["duration"].ToString());
     if (string.IsNullOrEmpty(reason) || duration <= 0)
     {
         return;
@@ -143,9 +143,9 @@ app.MapPost("/data/add_ban", async (HttpContext context, int id) =>
     }
 }).RequireAuthorization();
 
-app.MapPost("/data/change_ban", async (HttpContext context, int banId) =>
+app.MapPost("/data/change_ban", (HttpContext context, int banId) =>
 {
-    int duration = int.Parse(context.Request.Form["duration"]);
+    int duration = int.Parse(context.Request.Form["duration"].ToString());
     if (duration < 0)
     {
         return;

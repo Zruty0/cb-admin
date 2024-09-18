@@ -5,10 +5,10 @@ public class NewBanModel : PageModel
 {
     private DataClient dataClient;
 
-    public string PlayerName { get; set; }
+    public string PlayerName { get; set; } = null!;
     public int PlayerId { get; set; }
 
-    public BanPresetInfo[] Presets { get; set; }
+    public BanPresetInfo[] Presets { get; set; } = null!;
 
     public NewBanModel(IConfiguration configuration)
     {

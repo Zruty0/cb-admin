@@ -38,7 +38,7 @@ public class PlayerAliasInfo
 /// </summary>
 public class BanPresetInfo
 {
-    public string Reason { get; set; }
+    public string Reason { get; set; } = null!;
     public float DurationSecondsRaw {get;set;}
 
     // Presentation functions.

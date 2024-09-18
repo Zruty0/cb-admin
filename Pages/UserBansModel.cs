@@ -5,7 +5,7 @@ public class UserBansModel : PageModel
 {
     private DataClient dataClient;
 
-    public string PlayerName { get; set; }
+    public string PlayerName { get; set; } = null!;
 
     public UserBansModel(IConfiguration configuration)
     {
