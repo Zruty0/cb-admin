@@ -41,6 +41,12 @@ public class DataClient
     {
         using var conn = new NpgsqlConnection(ConnString);
         var admin = conn.Query<AdminInfo>("SELECT * FROM admin WHERE LOWER(name)=@name1 OR LOWER(name)=@name2", new { name1 = shortName, name2 = fullName }).AsList().SingleOrDefault();
+
+        // Strip the suffix from Discord name, if present.
+        if (admin != null && admin.Name.Contains('#'))
+        {
+            admin.Name = admin.Name.Substring(0, admin.Name.IndexOf('#'));
+        }
         return admin;
     }
 
