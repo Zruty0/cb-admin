@@ -79,9 +79,7 @@ app.Use(async (context, next) =>
 {
     if (context.User.Identity?.IsAuthenticated == true)
     {
-        bool isAdmin = dataClient.GetAdminInfo(context.User.Identity?.Name) != null;
-
-        // TODO: currently, this is based on Discord name (instead of name#discriminator).
+        bool isAdmin = dataClient.GetAdminInfo(context.User) != null;
 
         if (isAdmin)
         {
@@ -121,6 +119,17 @@ app.UseStaticFiles(new StaticFileOptions
 // Admin API
 app.Map("/data/get_user_info", async (HttpContext context, string name) =>
 {
+    var admin = dataClient.GetAdminInfo(context.User);
+    if (admin == null)
+    {
+
+        context.Response.StatusCode = 403;
+        await context.Response.WriteAsync("You are not an authorized CB Admin.");
+        return;
+    }
+
+    logger.Debug($"Admin {admin.Name} requesting user info for {name}");
+
     var output = dataClient.LoadPlayerInfo(name);
     await context.Response.WriteAsJsonAsync(output);
 }).RequireAuthorization();
@@ -133,11 +142,13 @@ app.MapPost("/data/add_ban", (HttpContext context, int id) =>
     {
         return;
     }
-    var adminInfo = dataClient.GetAdminInfo(context.User.Identity?.Name);
+    var adminInfo = dataClient.GetAdminInfo(context.User);
     if (adminInfo != null)
     {
-        // I think it should never be null, because this requires authorization. But adding this check just for good measure.
         var name = dataClient.GetLastPlayerName(id);
+
+        logger.Debug($"Admin {adminInfo.Name} bans player {name} (#{id}) for {TimeSpan.FromMinutes(duration):g}. Reason: {reason}");
+
         dataClient.AddNewBan(adminInfo.Id, id, reason, duration);
         context.Response.Redirect($"/user_bans?name={name}");
     }
@@ -150,13 +161,14 @@ app.MapPost("/data/change_ban", (HttpContext context, int banId) =>
     {
         return;
     }
-    var adminInfo = dataClient.GetAdminInfo(context.User.Identity?.Name);
+    var adminInfo = dataClient.GetAdminInfo(context.User);
     if (adminInfo != null)
     {
-        // I think it should never be null, because this requires authorization. But adding this check just for good measure.
+        var name = context.Request.Form["playerName"];
+
+        logger.Debug($"Admin {adminInfo.Name} changes ban duration for player {name} to {TimeSpan.FromMinutes(duration):g}.");
         dataClient.ChangeBanDuration(banId, duration, adminInfo.Id);
 
-        var name = context.Request.Form["playerName"];
         context.Response.Redirect($"/user_bans?name={name}");
     }
 }).RequireAuthorization();

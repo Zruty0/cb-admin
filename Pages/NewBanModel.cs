@@ -17,7 +17,7 @@ public class NewBanModel : PageModel
 
     public void OnGet(int playerId)
     {
-        var admin = dataClient.GetAdminInfo(User.Identity?.Name);
+        var admin = dataClient.GetAdminInfo(User);
         if (admin == null)
         {
             throw new UnauthorizedAccessException();

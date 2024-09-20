@@ -14,7 +14,7 @@ public class UserBansModel : PageModel
 
     public void OnGet(string? name)
     {
-        var admin = dataClient.GetAdminInfo(User.Identity?.Name);
+        var admin = dataClient.GetAdminInfo(User);
         if (admin == null)
         {
             throw new UnauthorizedAccessException();

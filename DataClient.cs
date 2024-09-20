@@ -2,6 +2,8 @@ using Npgsql;
 using NpgsqlTypes;
 using Dapper;
 using System.Runtime.CompilerServices;
+using System.Security.Principal;
+using System.Security.Claims;
 
 namespace CbAdmin;
 
@@ -20,10 +22,25 @@ public class DataClient
         ConnString = configuration.GetValue<string>("DatabaseConnString")!;
     }
 
-    public AdminInfo? GetAdminInfo(string? userName)
+    public AdminInfo? GetAdminInfo(ClaimsPrincipal user)
+    {
+        var usernameClaim = user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name);
+        var discriminatorClaim = user.Claims.FirstOrDefault(c => c.Type == "urn:discord:user:discriminator");
+
+        if (usernameClaim == null || discriminatorClaim == null)
+        {
+            // Discord auth not complete.
+            return null;
+        }
+
+        var finalName = $"{usernameClaim.Value}#{discriminatorClaim.Value}";
+        return DoGetAdminInfo(user.Identity?.Name, finalName);
+    }
+
+    private AdminInfo? DoGetAdminInfo(string? shortName, string fullName)
     {
         using var conn = new NpgsqlConnection(ConnString);
-        var admin = conn.Query<AdminInfo>("SELECT * FROM admin WHERE LOWER(name)=@name", new { name = userName }).AsList().SingleOrDefault();
+        var admin = conn.Query<AdminInfo>("SELECT * FROM admin WHERE LOWER(name)=@name1 OR LOWER(name)=@name2", new { name1 = shortName, name2 = fullName }).AsList().SingleOrDefault();
         return admin;
     }
 

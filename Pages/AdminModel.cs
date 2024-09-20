@@ -14,7 +14,7 @@ public class AdminModel : PageModel
 
     public void OnGet()
     {
-        var admin = dataClient.GetAdminInfo(User.Identity?.Name);
+        var admin = dataClient.GetAdminInfo(User);
         if (admin == null)
         {
             throw new UnauthorizedAccessException();
