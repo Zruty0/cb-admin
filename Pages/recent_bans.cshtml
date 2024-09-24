@@ -1,0 +1,60 @@
+@page
+@model RecentBansModel
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Milligram CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
+    <link rel="stylesheet" href="/main.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="column">
+                @{
+                    await Html.RenderPartialAsync("_AdminMenu");
+                }
+            </div>
+        </div>
+        <div class="row">
+            <div class="column">
+                <h3>Recent Bans</h3>
+                <a class="button button-outline" id="newban">Add new ban</a>
+                <table id="bans">
+                    <thead>
+                        <th>Player name</th>
+                        <th>Reason</th>
+                        <th>Ban issued</th>
+                        <th>Ban expires</th>
+                        <th>Admin name</th>
+                        <th>Action</th>
+                    </thead>
+                    <tbody>
+                        @foreach (var ban in Model.RecentBans)
+                        {
+                            <tr>
+                                <td>
+                                    <a href="/user_bans?name=@Html.UrlEncoder.Encode(ban.PlayerName)"> @ban.PlayerName</a>
+                                </td>
+                                <td>@ban.Reason</td>
+                                <td>@ban.StartTimeStr</td>
+                                <td>@ban.ExpiryTimeStr</td>
+                                <td>@ban.AdminName</td>
+                                <td>
+                                    @if (ban.RemainingTimeMinutes > 0)
+                                    {
+                                        <a href="/edit_ban?banid=@ban.Id">Edit</a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <img id="loading" src="/loading.gif" alt="Loading..." style="display:none" />
+            </div>
+        </div>
+    </div>
+</body>

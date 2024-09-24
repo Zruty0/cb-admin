@@ -160,4 +160,29 @@ public class DataClient
             now = DateTime.Now
         });
     }
+
+    public BanInfo[] GetRecentBans(int n)
+    {
+        using var conn = new NpgsqlConnection(ConnString);
+        var bans = conn.Query<BanInfo>(
+                @"select 
+                    ban.id as Id,
+                    ban.player_id as PlayerId,
+                    p.player_nick as PlayerName,
+                    reason,
+                    created as StartTime,
+                    expires as ExpiryTime,
+                    ad.name as AdminName,
+                    last_updated
+                from ban 
+                    inner join admin ad on ban.admin_id = ad.id
+                    inner join (
+                        select player_id, MIN(player_nick) as player_nick from player_nick group by player_id
+                    ) p on p.player_id = ban.player_id
+                order by last_updated desc
+                limit @n",
+                new { n = n })
+                .AsList();
+        return bans.ToArray();
+    }
 }
