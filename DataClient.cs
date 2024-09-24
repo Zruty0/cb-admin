@@ -72,7 +72,7 @@ public class DataClient
     public PlayerInfo? LoadPlayerInfo(string playerName)
     {
         using var conn = new NpgsqlConnection(ConnString);
-        int? id = conn.Query<int?>("select player_id from player_nick where player_nick = @name order by last_used desc", new { name = playerName }).FirstOrDefault();
+        int? id = conn.Query<int?>("select player_id from player_nick where LOWER(player_nick) = LOWER(@name) order by last_used desc", new { name = playerName }).FirstOrDefault();
         if (id == null)
         {
             return null;

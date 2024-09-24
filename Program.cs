@@ -12,6 +12,15 @@ using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
 using LogLevel = NLog.LogLevel;
+using System.Globalization;
+
+// Configure the culture
+var cultureInfo = new CultureInfo("en-GB"); // For UK-style dates: dd/MM/yyyy
+cultureInfo.DateTimeFormat.ShortDatePattern = "dd/MM/yyyy";
+cultureInfo.DateTimeFormat.LongDatePattern = "dd MMMM yyyy";
+
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 // Set up logging
 var config = new LoggingConfiguration();
@@ -37,7 +46,7 @@ var services = builder.Services;
 
 var client = new DataClient(builder.Configuration);
 
-// This is Discord authentication, which is used to authenticate RCI officers.
+// This is Discord authentication, which is used to authenticate Combat Box administrators.
 services.AddAuthentication(options =>
     {
         options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
